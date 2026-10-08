@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed() { return request.auth != null; }
+  function member(code) { return signed() && exists(/databases/$(database)/documents/rooms/$(code)/members/$(request.auth.uid)); }
+  function text(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+  function difficultyValid(d) { return d in ['expert','hard','medium','easy']; }
+  function timingUnit(d) { return d == 'expert' ? 1 : d == 'hard' ? 10 : d == 'easy' ? 1000 : 100; }
+  match /rooms/{code} {
+   allow get: if signed();
+   allow list: if false;
+   allow create: if signed() && code.matches('^[A-Z2-9]{8}$')
+    && request.resource.data.keys().hasOnly(['name','owner','currentRound','createdAt'])
+    && text(request.resource.data.name,24) && request.resource.data.owner == request.auth.uid
+    && request.resource.data.currentRound == '' && request.resource.data.createdAt == request.time;
+   allow update: if member(code) && resource.data.owner == request.auth.uid
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentRound'])
+    && request.resource.data.currentRound != resource.data.currentRound
+    && existsAfter(/databases/$(database)/documents/rooms/$(code)/rounds/$(request.resource.data.currentRound));
+   match /members/{user} {
+    allow get: if signed() && (user == request.auth.uid || member(code));
+    allow list: if member(code);
+    allow create: if signed() && user == request.auth.uid
+     && existsAfter(/databases/$(database)/documents/rooms/$(code))
+     && request.resource.data.keys().hasOnly(['name','joinedAt'])
+     && text(request.resource.data.name,16) && request.resource.data.joinedAt == request.time;
+    allow delete: if signed() && (user == request.auth.uid
+     || (member(code) && get(/databases/$(database)/documents/rooms/$(code)).data.owner == request.auth.uid
+      && user != get(/databases/$(database)/documents/rooms/$(code)).data.owner));
+    allow update: if signed() && user == request.auth.uid
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clockAt'])
+     && request.resource.data.clockAt == request.time;
+   }
+   match /rounds/{roundId} {
+    allow update: if member(code) && request.auth.uid in resource.data.participants
+     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stopped'])
+     && request.resource.data.stopped is list
+     && request.resource.data.stopped.toSet() == resource.data.get('stopped',[]).toSet().union([request.auth.uid].toSet())
+     && existsAfter(/databases/$(database)/documents/results/$(code + '_' + roundId + '_' + request.auth.uid));
+    allow read: if member(code);
+    allow create: if member(code) && get(/databases/$(database)/documents/rooms/$(code)).data.owner == request.auth.uid
+     && request.resource.data.keys().hasOnly(['targetMs','difficulty','startAt','countdownMs','participants','stopped','createdAt'])
+     && request.resource.data.targetMs is int && request.resource.data.targetMs >= 1000
+     && request.resource.data.targetMs <= 60000
+     && difficultyValid(request.resource.data.get('difficulty','medium'))
+     && request.resource.data.targetMs % timingUnit(request.resource.data.get('difficulty','medium')) == 0
+     && request.resource.data.startAt is timestamp
+     && request.resource.data.startAt == request.time
+     && request.resource.data.countdownMs == 5000
+     && request.resource.data.participants is list && request.resource.data.participants.size() <= 30
+     && request.resource.data.stopped == []
+     && request.auth.uid in request.resource.data.participants
+     && request.resource.data.createdAt == request.time
+     && getAfter(/databases/$(database)/documents/rooms/$(code)).data.currentRound == roundId;
+   }
+  }
+  match /results/{resultId} {
+   allow read: if signed();
+   function validResult() {
+    let r = request.resource.data;
+    let family = get(/databases/$(database)/documents/rooms/$(r.familyId)).data;
+    let round = get(/databases/$(database)/documents/rooms/$(r.familyId)/rounds/$(r.roundId)).data;
+    return signed() && r.keys().hasOnly(['uid','familyId','familyName','roundId','name','targetMs','difficulty','elapsedMs','createdAt'])
+     && r.uid == request.auth.uid && member(r.familyId)
+     && resultId == r.familyId + '_' + r.roundId + '_' + request.auth.uid
+     && r.roundId == family.currentRound && r.familyName == family.name
+     && r.name == get(/databases/$(database)/documents/rooms/$(r.familyId)/members/$(request.auth.uid)).data.name
+     && request.auth.uid in round.participants && r.targetMs == round.targetMs
+     && r.get('difficulty','medium') == round.get('difficulty','medium')
+     && r.elapsedMs is int && r.elapsedMs >= 0 && r.elapsedMs <= 86400000
+     && r.elapsedMs % timingUnit(round.get('difficulty','medium')) == 0
+     && request.time >= round.startAt + duration.value(round.get('countdownMs',0),'ms')
+     && r.createdAt == request.time;
+   }
+   allow create: if validResult();
+  }
+ }
+}

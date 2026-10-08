@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {targetValue,rankResults,familyRanks,displayedMs,targetHit,timeText} from '../public/core.mjs';
+test('네 난이도의 표시와 성공 판정 경계',()=>{for(const [d,unit,text] of [['expert',1,'5.000'],['hard',10,'5.00'],['medium',100,'5.0'],['easy',1000,'5']]){assert.equal(timeText(5000,d),text);assert.equal(targetHit(5000+unit*.49,5000,d),true);assert.equal(targetHit(5000+unit*.5,5000,d),false);}});
+test('목표 시간 입력 단위는 선택 난이도와 일치',()=>{assert.equal(targetValue('5.123','expert'),5123);assert.equal(targetValue('5.12','hard'),5120);assert.throws(()=>targetValue('5.123','hard'));assert.throws(()=>targetValue('5.1','easy'));assert.equal(targetValue('5','easy'),5000);});
+test('가족 랭킹은 같은 난이도의 기록만 비교',()=>{const rows=[{familyId:'a',familyName:'a',uid:'1',targetMs:5000,elapsedMs:5000,difficulty:'easy'},{familyId:'a',familyName:'a',uid:'2',targetMs:5000,elapsedMs:5000,difficulty:'expert'}];assert.equal(familyRanks(rows,'easy').length,0);assert.equal(familyRanks(rows,'expert').length,0);});
+test('5.0초 표시 범위가 성공 판정과 일치',()=>{for(const ms of [4950,4999,5000,5049]){assert.equal(displayedMs(ms),5000);assert.equal(targetHit(ms,5000),true);}assert.equal(targetHit(4949,5000),false);assert.equal(targetHit(5050,5000),false);});
+test('목표 시간의 소수 단위와 범위',()=>{assert.equal(targetValue('5.1'),5100);assert.equal(targetValue('60.0'),60000);for(const v of ['','abc',0.9,60.1,5.15])assert.throws(()=>targetValue(v));});
+test('빠른 기록과 늦은 기록을 절대 오차로 비교',()=>{const r=rankResults([{name:'A',elapsedMs:5100,targetMs:5000},{name:'B',elapsedMs:4980,targetMs:5000},{name:'C',elapsedMs:4900,targetMs:5000}]);assert.equal(r[0].name,'B');assert.equal(r[1].name,'A');});
+test('가족 랭킹은 상대 오차 평균과 2명 이상 기준',()=>{const r=familyRanks([{familyId:'A',familyName:'A',uid:'1',elapsedMs:5100,targetMs:5000},{familyId:'A',familyName:'A',uid:'2',elapsedMs:10200,targetMs:10000},{familyId:'B',familyName:'B',uid:'3',elapsedMs:5000,targetMs:5000}]);assert.equal(r.length,1);assert.equal(r[0].error,2);});

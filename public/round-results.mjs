@@ -1,0 +1,2 @@
+import {rankResults} from './core.mjs';
+export function completedRoundResults(round,records,members,now){if(!round)return null;const start=round.startAt?.toMillis?.();if(!Number.isFinite(start)||now<start+(round.countdownMs||0))return null;const rows=rankResults(records.filter(r=>r.roundId===round.id&&round.participants.includes(r.uid)));const active=round.participants;const complete=active.every(id=>rows.some(r=>r.uid===id));return rows.length&&complete?rows:null;}
