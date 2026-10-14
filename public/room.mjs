@@ -27,7 +27,7 @@ export async function startFamilyRound({api,db,uid,code,targetMs,difficulty='med
   if(participants.length>30)throw Error('한 가족방은 최대 30명까지 플레이할 수 있어요.');
   const ref=api.doc(api.collection(db,'rooms',code,'rounds'));
   const batch=api.writeBatch(db);
-  batch.set(ref,{targetMs,difficulty,startAt:api.serverTimestamp(),countdownMs:5000,participants,stopped:[],createdAt:api.serverTimestamp()});
+  batch.set(ref,{targetMs,difficulty,startAt:api.serverTimestamp(),countdownMs:7000,participants,stopped:[],createdAt:api.serverTimestamp()});
   batch.update(api.doc(db,'rooms',code),{currentRound:ref.id});
   await batch.commit();
   return ref.id;
@@ -59,3 +59,5 @@ export async function syncCommittedClock({projectId,code,uid,token,fetcher=fetch
  if(!Number.isFinite(committed))throw Error('서버 응답에 시간이 없어요. 다시 시도해주세요.');
  return committed-(before+after)/2;
 }
+
+export function countdownText(wait){return wait>5000?'':String(Math.max(1,Math.ceil(wait/1000)));}

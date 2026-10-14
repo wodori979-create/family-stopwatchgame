@@ -6,4 +6,3 @@ export function timeText(ms,d='medium'){return (displayedMs(ms,d)/1000).toFixed(
 export function targetHit(elapsedMs,targetMs,d='medium'){return displayedMs(elapsedMs,d)===targetMs;}
 export function timingError(r){return Math.abs(displayedMs(r.elapsedMs,r.difficulty)-r.targetMs);}
 export function rankResults(rows){return [...rows].sort((a,b)=>timingError(a)-timingError(b));}
-export function familyRanks(rows,difficulty='medium'){const groups=new Map();for(const r of rows){if((r.difficulty||'medium')!==difficulty)continue;if(!groups.has(r.familyId))groups.set(r.familyId,{name:r.familyName,id:r.familyId,total:0,count:0,people:new Set()});const g=groups.get(r.familyId);g.total+=timingError(r)/r.targetMs*100;g.count++;g.people.add(r.uid);}return [...groups.values()].filter(g=>g.people.size>=2).map(g=>({...g,error:g.total/g.count})).sort((a,b)=>a.error-b.error);}
