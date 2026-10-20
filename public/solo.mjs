@@ -19,3 +19,5 @@ document.addEventListener('family-round-start',cancel);document.addEventListener
 render();controls();
 
 $('difficulty').onchange=()=>{render();const info=difficultyInfo(getDifficulty());$('target').step=String(info.unit/1000);target=displayedMs(target,getDifficulty());change(target/1000);$('timer').textContent=timeText(0,getDifficulty());$('minus').setAttribute('aria-label',`목표 시간 ${info.unit/1000}초 줄이기`);$('plus').setAttribute('aria-label',`목표 시간 ${info.unit/1000}초 늘리기`);};
+
+window.addEventListener('arcade-home',cancel);

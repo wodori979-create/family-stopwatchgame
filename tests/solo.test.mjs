@@ -8,7 +8,7 @@ function play(elapsed,reduced=false){
  const elements=new Map(),values=new Map();let time=0;
  const element=id=>{if(!elements.has(id))elements.set(id,{value:id==='solo-target'?'5.0':'',hidden:id==='celebration',children:[],style:{setProperty(){}},classList:{toggle(){}},replaceChildren(...children){this.children=children;},append(child){this.children.push(child);}});return elements.get(id);};
  const document={getElementById:element,createElement:()=>element('particle-'+Math.random()),querySelectorAll:()=>[],addEventListener(){},dispatchEvent(){}};
- runInNewContext(source,{document,localStorage:{getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)},performance:{now:()=>time},requestAnimationFrame:()=>1,cancelAnimationFrame(){},setTimeout:()=>1,clearTimeout(){},matchMedia:()=>({matches:reduced}),Event:class{},Math});
+ runInNewContext(source,{window:{addEventListener(){}},document,localStorage:{getItem:key=>values.get(key),setItem:(key,value)=>values.set(key,value)},performance:{now:()=>time},requestAnimationFrame:()=>1,cancelAnimationFrame(){},setTimeout:()=>1,clearTimeout(){},matchMedia:()=>({matches:reduced}),Event:class{},Math});
  element('solo-go').onclick();time=elapsed;element('solo-stop').onclick();
  return {elements,values};
 }
