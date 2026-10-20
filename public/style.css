@@ -137,3 +137,8 @@ body:has(.view:not([hidden]) .game.focus-game){overflow:hidden;overscroll-behavi
 #game-shell .game.focus-game .clock-face.round-counting .round-countdown{display:flex;align-items:center;justify-content:center;flex:1;min-height:0;width:100%;font-size:clamp(120px,36vmin,340px);line-height:1;color:#efff7e;text-shadow:0 0 16px #edff7066,0 0 48px #c6ff4022;font-variant-numeric:tabular-nums}
 #game-shell .game.focus-game .clock-face.round-counting .led-display{display:none}
 @media(orientation:landscape) and (max-height:550px){#game-shell .game.focus-game .clock-face.round-counting .round-countdown{font-size:clamp(90px,45vh,220px)}}
+/* On phones, keep the opening edge-to-edge and let audio controls scroll away. */
+@media(max-width:767px){
+ #arcade-entry::before{display:none;content:none}
+ #music-toggle{position:absolute}
+}
