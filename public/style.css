@@ -121,3 +121,19 @@ html body button,html body input,html body select,html body summary{font-synthes
 /* Mode title already appears in the toolbar; keep game state nodes for logic. */
 #game-shell .game>.game-head{display:none}
 #game-shell .game>label:first-of-type{margin-top:4px}
+/* During a round, turn the existing card into a full-viewport game console. */
+body:has(.view:not([hidden]) .game.focus-game){overflow:hidden;overscroll-behavior:none}
+#game-shell .game.focus-game{position:fixed;inset:0;z-index:160;width:100%;max-width:none;height:100vh;height:100dvh;margin:0;padding:max(16px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));display:grid;grid-template-rows:minmax(0,1fr) clamp(110px,23dvh,180px);gap:20px;border:0;border-radius:0;background:radial-gradient(ellipse at 50% 35%,#2e2440,#100c1b 78%);box-shadow:none}
+#game-shell .game.focus-game>*{display:none!important}
+#game-shell .game.focus-game>.clock-face{display:flex!important;min-height:0;width:100%;height:100%;aspect-ratio:auto;margin:0;padding:20px 8px;justify-content:center;border-radius:20px;background:#080910;border:2px solid #785795;overflow:hidden;box-shadow:inset 0 0 45px #000,0 0 22px #8454b722}
+#game-shell .game.focus-game>.clock-face .led-display{max-width:100%;flex-shrink:0}
+#game-shell .game.focus-game>.clock-face :is(#hint,#solo-hint,#battle-hint){font-size:clamp(17px,3vw,26px);margin:18px 0 0;text-align:center}
+#game-shell .game.focus-game>.actions{display:flex!important;min-height:0;margin:0;gap:18px}
+#game-shell .game.focus-game>.actions button{height:100%;min-height:0;font-size:clamp(36px,8vw,64px);border-radius:30px}
+#game-shell .game.focus-game>.actions small{font-size:clamp(17px,3vw,24px)}
+#game-shell .game.focus-game::before,#game-shell .game.focus-game::after{display:none}
+@media(orientation:landscape) and (max-height:550px){#game-shell .game.focus-game{grid-template-columns:minmax(0,1fr) minmax(160px,27%);grid-template-rows:minmax(0,1fr);gap:16px}#game-shell .game.focus-game>.actions{flex-direction:column;gap:16px}#game-shell .game.focus-game>.clock-face{padding:10px 6px}#game-shell .game.focus-game>.clock-face :is(#hint,#solo-hint,#battle-hint){margin-top:8px;font-size:17px}}
+.round-countdown{display:none}
+#game-shell .game.focus-game .clock-face.round-counting .round-countdown{display:flex;align-items:center;justify-content:center;flex:1;min-height:0;width:100%;font-size:clamp(120px,36vmin,340px);line-height:1;color:#efff7e;text-shadow:0 0 16px #edff7066,0 0 48px #c6ff4022;font-variant-numeric:tabular-nums}
+#game-shell .game.focus-game .clock-face.round-counting .led-display{display:none}
+@media(orientation:landscape) and (max-height:550px){#game-shell .game.focus-game .clock-face.round-counting .round-countdown{font-size:clamp(90px,45vh,220px)}}
