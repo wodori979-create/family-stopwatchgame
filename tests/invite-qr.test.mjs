@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import QRCode from 'qrcode';import {invitationUrl} from '../public/invite-qr.mjs';
+test('가족방 QR 초대 링크는 다른 방 파라미터를 제거하고 가족방 코드만 포함',()=>{assert.equal(invitationUrl('https://stopgame-35928.web.app/?battle=OLD#test','room','ABCDEFGH'),'https://stopgame-35928.web.app/?room=ABCDEFGH');});
+test('가족 대결 QR 초대 링크는 해당 대결 코드로 연결',()=>{assert.equal(invitationUrl('https://stopgame-35928.web.app/?room=OLD','battle','23456789'),'https://stopgame-35928.web.app/?battle=23456789');});
+test('두 모드의 실제 초대 URL을 QR 이미지로 생성 가능',async()=>{for(const mode of ['room','battle']){const url=invitationUrl('https://stopgame-35928.web.app/',mode,'ABCDEFGH');const png=await QRCode.toDataURL(url,{width:300,margin:4,errorCorrectionLevel:'M'});assert.ok(png.startsWith('data:image/png;base64,'));}});

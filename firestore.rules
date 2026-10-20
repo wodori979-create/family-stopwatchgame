@@ -20,6 +20,7 @@ service cloud.firestore {
      || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentRound']) && request.resource.data.currentRound != resource.data.currentRound && existsAfter(/databases/$(database)/documents/rooms/$(code)/rounds/$(request.resource.data.currentRound)))
      || (resource.data.get('kind','family') == 'battle' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['teams','assignments','pairings']) && request.resource.data.teams is map && text(request.resource.data.teams.a,24) && text(request.resource.data.teams.b,24) && request.resource.data.assignments is map && request.resource.data.pairings is map));
    match /members/{user} {
+    allow update: if member(code) && get(/databases/$(database)/documents/rooms/$(code)).data.get('kind','family') == 'battle' && (user == request.auth.uid || get(/databases/$(database)/documents/rooms/$(code)).data.owner == request.auth.uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['team']) && request.resource.data.team in ['a','b'];
     allow get: if signed() && (user == request.auth.uid || member(code));
     allow list: if member(code);
     allow create: if signed() && user == request.auth.uid

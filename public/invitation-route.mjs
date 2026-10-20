@@ -1,0 +1,1 @@
+export function invitationRoute(search){const params=new URLSearchParams(search);if(params.get('battle'))return {mode:'battle',code:params.get('battle')};if(params.get('room'))return {mode:'family',code:params.get('room')};return null;}

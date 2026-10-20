@@ -1,0 +1,3 @@
+import QRCode from 'qrcode';
+export function invitationUrl(base,mode,code){const url=new URL(base);url.search='';url.hash='';url.searchParams.set(mode,code);return url.href;}
+export async function showInviteQr(url,title){const dialog=document.getElementById('invite-qr-dialog');document.getElementById('invite-qr-title').textContent=title;document.getElementById('invite-qr-link').textContent=url;await QRCode.toCanvas(document.getElementById('invite-qr-canvas'),url,{width:300,margin:4,errorCorrectionLevel:'M',color:{dark:'#102b24',light:'#ffffff'}});if(!dialog.open)dialog.showModal();document.getElementById('invite-qr-close').focus();}

@@ -10,7 +10,8 @@
     "prepreview": "npm run build"
   },
   "dependencies": {
-    "firebase": "^12.19.0"
+    "firebase": "^12.19.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "esbuild-wasm": "^0.28.2"
